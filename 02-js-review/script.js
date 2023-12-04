@@ -232,7 +232,7 @@ console.log(spanishTranslation);
 const count = book.reviews.librarything?.reviewsCount ?? "no data";
 console.log(`Reviews count: ${count}.`);
 
-// optional chainging - only reading property if the properties before exist (,get(value, 0) in python)
+// optional chaining - only reading property if the properties before exist (,get(value, 0) in python)
 function getTotalReviewCount(book) {
   const goodread = book.reviews.goodreads.reviewsCount;
   const libraryanything = book.reviews.librarything?.reviewsCount ?? 0;
@@ -271,3 +271,38 @@ const adventureBooks = books
     .map((book) => book.title);
 console.log(adventureBooks);
 
+// reduce - sum same properties on all objects
+const pagesAllBooks = books.reduce((sum, book) => sum + book.pages, 0); // sum = accumulator for value
+console.log(pagesAllBooks);
+
+// sort - changing also original array
+const arr = [3, 1, 6, 5, 9];
+const sortedArr = arr.sort((a, b) => a - b); // sort ascending
+console.log(arr, sortedArr);
+
+// how to keep original unaffected - use slice() -> copy
+const arrB = [3, 1, 5, 2, 5]
+const sortedArrB = arrB.slice().sort((a, b ) => a -b );
+console.log(arrB, sortedArrB);
+
+const sortedByPages = books.slice().sort((a, b) => b.pages - a.pages);
+console.log(sortedByPages.map((book) => ({title: book.title, pages: book.pages})));
+
+// immutable arrays
+// add object to array (Python dict.update()
+const newBook = {
+  id: 6,
+  title: "Outliers",
+  autrhor: "Malcolm Gladwell",
+};
+
+const booksAfterAdd = [...books, newBook];
+console.log(booksAfterAdd);
+
+// delete book object from array
+const booksAfterDelete =  booksAfterAdd.filter((book) => book.id !== 6); // not removing a book, rather filtering it out
+console.log(booksAfterDelete);
+
+// update books about book
+const booksAfterUpdate = booksAfterDelete.map((book) => book.id === 5 ? {...book, title: book.title = "A Game of Thrones MF!"} : book);
+console.log(booksAfterUpdate);
