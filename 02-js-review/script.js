@@ -219,7 +219,7 @@ console.log("" && "string is") // empty string is false
 
 // or operator ((works exactly the opposite way)
 console.log(true || "Some string");
-// works when first operator is false - not looking in the second
+// works when first operator is false - looking in the second
 console.log(false || "Some string");
 
 console.log(hasMovieAdaptation || "This book has a movie.");
@@ -232,7 +232,7 @@ console.log(spanishTranslation);
 const count = book.reviews.librarything?.reviewsCount ?? "no data";
 console.log(`Reviews count: ${count}.`);
 
-// optional chaining - only reading property if the properties before exist (,get(value, 0) in python)
+// optional chaining - only reading property if the properties before exist (.get(value, 0) in python)
 function getTotalReviewCount(book) {
   const goodread = book.reviews.goodreads.reviewsCount;
   const libraryanything = book.reviews.librarything?.reviewsCount ?? 0;
@@ -245,7 +245,7 @@ console.log(getTotalReviewCount(book));
 // ARRAY METHODS - returns new array, not affecting the original
 const books = getBooks();
 
-// map -> run defined expression over each array element
+// map -> run defined expression over each array element (new array will have exactly same elements)
 const doubling = [1, 2, 3, 4, 5].map((el) => el * 2);
 console.log(doubling);
 
@@ -259,7 +259,7 @@ const essentialData = books.map((book) => ({
 }));
 console.log(essentialData);
 
-// filter -> filters out elements where defined expression is false
+// filter -> filters out elements where defined expression is false (new array is basically with fewer elements)
 const longBooks = books.filter((book) => book.pages > 500);
 console.log(longBooks.map((book) => book.pages));
 
@@ -306,3 +306,23 @@ console.log(booksAfterDelete);
 // update books about book
 const booksAfterUpdate = booksAfterDelete.map((book) => book.id === 5 ? {...book, title: book.title = "A Game of Thrones MF!"} : book);
 console.log(booksAfterUpdate);
+
+// async JS
+// promise method
+fetch('https://jsonplaceholder.typicode.com/todos')// not wait until data is fetched, continue with next line
+    .then(res => res.json())
+    .then(data.map((d) => console.log(d.id)));
+// this can be executed before data from about fetch are ready
+console.log("Later")
+
+// async - await
+async function getTodos() {
+  const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+  const data = await response.json();
+  console.log(data);
+}
+
+const toDos = getTodos();
+console.log(toDos);
+
+
