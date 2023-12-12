@@ -80,11 +80,16 @@ function Menu() {
             <h2>Our menu</h2>
 
             {pizzaData.length > 0 ? (
+            <>
+                <p>
+                    This is the best pizza in the whole funcking world.
+                </p>
                 <ul className="pizzas">
                     {pizzaData.map((pizza) => (
                         <Pizza pizzaObj={pizza} key={pizza.name}></Pizza>
                     ))}
                 </ul>
+            </>
             ) : <p>We are still working on our menu, come back later please.</p>
             }
 
@@ -106,16 +111,16 @@ function Menu() {
     )
 }
 
-function Pizza(props) {
-    if(props.pizzaObj.soldOut) return null;
+function Pizza({pizzaObj}) {
+    // if(pizzaObj.soldOut) return null;
 
       return (
-          <div className="pizza">
-            <img src={props.pizzaObj.photoName} alt={props.name}/>
+          <div className={`pizza ${pizzaObj.soldOut ? "sold-out": ""}`}>
+            <img src={pizzaObj.photoName} alt={pizzaObj.name}/>
               <li>
-                  <h3>{props.pizzaObj.name}</h3>
-                  <p>{props.pizzaObj.ingredients}</p>
-                  <span>{props.pizzaObj.price + 3}</span>
+                  <h3>{pizzaObj.name}</h3>
+                  <p>{pizzaObj.ingredients}</p>
+                  <span>{pizzaObj.soldOut ? "SOLD OUT" : pizzaObj.price + 3}</span>
               </li>
           </div>
       )
@@ -128,7 +133,7 @@ function Footer() {
 
     return (
         <footer className="footer">
-            {isOpen ? (
+            {(isOpen && pizzaData.length > 0) ? (
                 <Order />
             ) : (
                     <p>
