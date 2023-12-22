@@ -19,7 +19,8 @@ body {
 
 .buttons {
   display: flex;
-  justify-content: space-between;
+
+  justify-content: center;
 }
 
 .buttons button {
@@ -28,7 +29,6 @@ body {
   padding: 10px 15px;
   font-size: 14px;
   font-weight: bold;
-
   display: flex;
   align-items: center;
   gap: 10px;
@@ -39,6 +39,9 @@ body {
   line-height: 1;
 }
 
+h2 {
+  text-align: center;
+}
 h3 {
   margin: 0;
   text-transform: uppercase;
