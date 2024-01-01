@@ -7,21 +7,31 @@ const initialItems = [
 ];
 
 export default function App() {
+    // as sibillings components Form and PackageList needs to operate with items,
+    // state was "lifted" here, so now handleAddItem function is set to Form component
+    // whereas items list is sent to PackageList component
+
+    const [items, setItems] = useState([]);
+
+    function handleAddItem(item) {
+        setItems(items => [...items, item] );
+    }
+
     return (
         <div className="app">
             <Logo />
-            <Form />
-            <PackagingList />
+            <Form onAddItems={handleAddItem}/>
+            <PackagingList items={items}/>
             <Stats />
         </div>
-)
+    )
 }
 
 function Logo() {
     return <h1>🏝️ Far Away 🧳</h1>;
 }
 
-function Form() {
+function Form({onAddItems}) {
     const defaultQuantity = 1;
     const defaultDescription = "";
 
@@ -36,6 +46,9 @@ function Form() {
         // creating new object based on state values
         const newItem = { description, quantity, packed: false, id: Date.now() };
         console.log(newItem);
+
+        // now newly added item is handled so it can be stored and displayed
+        onAddItems(newItem);
 
         // after form is submitted, we want to reset fields to default
         setQuantity(defaultQuantity)
@@ -72,11 +85,11 @@ function Form() {
     );
 }
 
-function PackagingList() {
+function PackagingList({items}) {
     return (
         <div className="list">
             <ul>
-                {initialItems.map((item) => (
+                {items.map((item) => (
                     <Item item={item} key={item.id}/>
                     ))}
             </ul>
