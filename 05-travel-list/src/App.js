@@ -1,28 +1,43 @@
 import {useState} from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: false },
-  { id: 3, description: "Battery", quantity: 10, packed: true },
-];
-
 export default function App() {
-    // as sibillings components Form and PackageList needs to operate with items,
+    // as siblings components Form and PackageList needs to operate with items,
     // state was "lifted" here, so now handleAddItem function is set to Form component
-    // whereas items list is sent to PackageList component
+    // whereas items list and Toggle/Delete handlers are sent to PackageList component
 
+    // items state
     const [items, setItems] = useState([]);
 
+    // functions to manipulate item within items list
     function handleAddItem(item) {
-        setItems(items => [...items, item] );
+        // adding new value is done by extension of the list by original list and new item
+        setItems((items) => [...items, item] );
+    }
+
+    function handleDeleteItem(id) {
+        // deleting is executed by filtering out the item to delete from the items list
+        // that means we create new list with all items but the filtered one
+        setItems((items) => items.filter(item => item.id !== id));
+    }
+
+    function handleToggleItem(id) {
+        // updating of specific attribute of the item is done by finding specific item
+        // using map, then changing attribute to opposite value and then adding
+        // the original item values + new value into the object
+        setItems((items) => items.map(
+            item => item.id === id ? {...item, packed: !item.packed} : item))
     }
 
     return (
         <div className="app">
             <Logo />
             <Form onAddItems={handleAddItem}/>
-            <PackagingList items={items}/>
-            <Stats />
+            <PackagingList
+                items={items}
+                onDeleteItem={handleDeleteItem}
+                onToggleItem={handleToggleItem}
+            />
+            <Stats items={items}/>
         </div>
     )
 }
@@ -40,14 +55,14 @@ function Form({onAddItems}) {
 
     function handleSubmit(e) {  // typical name of form submitting function, e = event
         e.preventDefault(); // preventing reload of the page on submit
-        // console.log(e)
+        // form is blocked from submit if the description is not provided
         if (!description) return;
 
         // creating new object based on state values
         const newItem = { description, quantity, packed: false, id: Date.now() };
         console.log(newItem);
 
-        // now newly added item is handled so it can be stored and displayed
+        // now newly added item is handled, so it can be stored and displayed
         onAddItems(newItem);
 
         // after form is submitted, we want to reset fields to default
@@ -85,34 +100,83 @@ function Form({onAddItems}) {
     );
 }
 
-function PackagingList({items}) {
+function PackagingList({items, onDeleteItem, onToggleItem}) {
+    const [sortBy, setSortBy] = useState("input")
+
+    // as this variable is going to be changed we use `let` instead of `const`
+    let sortedItems; // `sortedItems` is actually derived state
+
+    if(sortBy === "input") sortedItems = items;
+    if(sortBy === "description") sortedItems = items
+        .slice()
+        .sort((a, b) => a.description.localeCompare(b.description));
+    if(sortBy === "packedStatus") sortedItems = items
+        .slice()
+        .sort((a, b) => Number(b.packed) - Number(a.packed));
+
     return (
         <div className="list">
             <ul>
-                {items.map((item) => (
-                    <Item item={item} key={item.id}/>
+                {sortedItems.map((item) => (
+                    <Item
+                        item={item}
+                        onDeleteItem={onDeleteItem}
+                        onToggleItem={onToggleItem}
+                        key={item.id}/>
                     ))}
             </ul>
+
+            <div className="actions">
+                <select value={sortBy} onChange={e=>setSortBy(e.target.value)}>
+                    <option value="input">Sort by the input order</option>
+                    <option value="description">Sort by the description</option>
+                    <option value="packedStatus">Sort by the packed status</option>
+                </select>
+            </div>
         </div>
     );
 }
 
-function Item({item}) {
+function Item({item, onDeleteItem, onToggleItem}) {
+    // it is crucial to call delete/toggle function with `() =>` - this way the function
+    // is called only when event is happening
     return (
         <li>
+            <input
+                type="checkbox"
+                value={item.packed}
+                onChange={() => {onToggleItem(item.id)}}
+            />
             <span style={item.packed ? { textDecoration: "line-through"}: {}}>
                 {item.quantity} {item.description}
             </span>
-            <button>❌</button>
+            <button onClick={() => onDeleteItem(item.id)}>❌</button>
         </li>
     );
 }
 
-function Stats() {
+function Stats({items}) {
+    // if no items are in the list yet, calculation does not need to be performed, and
+    // we can return different message into the footer
+    if(!items.length) return (
+        <p className="stats">
+            <em>Start packing yourself!</em>
+        </p>
+    )
+
+    const itemsCount = items.length
+    const packedItems = items.filter((items) => items.packed).length
+    const percentagePacked = Math.round((packedItems / itemsCount) * 100)
+
     return (
         <footer className="stats">
             <em>
-                You have X items on your list, and you already packed X (X)
+                {
+                    percentagePacked === 100 ?
+                        `You got all ${itemsCount} stuff packed so you are ready to go!` :
+                        `You have ${itemsCount} items on your list, and you already 
+                        packed ${packedItems} (${percentagePacked}%)`
+                }
             </em>
       </footer>
     )
