@@ -11,7 +11,6 @@ export default function App() {
   return (
       <div>
         <Steps />
-        <Steps />
       </div>
   )
 }
@@ -46,26 +45,65 @@ function Steps() {
           <div className={step >= 3 ? "active" : ""}>3</div>
         </div>
 
-        <p className="message">Step {step}: {messages[step-1]}</p>
+
+        <StepMessage step={step}>
+          {messages[step -1]}
+
+          <div className="buttons">
+            <Button
+                textColor="#000"
+                bgColor="grey"
+                onClickHandler={() => alert(`Learn how to ${messages[step-1]}`)}
+                >
+              <h3>Learn how</h3>
+            </Button>
+          </div>
+        </StepMessage>
+
+
 
         <div className="buttons">
-          <button
-              style={{backgroundColor: "#7950f2", color: "#fff"}}
-              onClick={handlePrevious}  // must be just stated, not called directly
-          >
-            Previous
-          </button>
+          <Button
+              textColor="#fff"
+              bgColor="#7950f2"
+              onClickHandler={handlePrevious}
+              >
+            <span>👈🏻</span>Previous
+          </Button>
 
-          <button
-              style={{backgroundColor: "#7950f2", color: "#fff"}}
-              onClick={handleNext}  // must be just stated, not called directly
-          >
-            Next
-          </button>
+          <Button
+              textColor="#fff"
+              bgColor="#7950f2"
+              onClickHandler={handleNext}
+              >
+            Next<span>👉🏻</span>
+          </Button>
 
         </div>
       </div>
       )}
   </div>
   )
+}
+
+function StepMessage({step, children}) {
+  return (
+      <div className="message">
+        <h3>Step {step}</h3>
+        {children}
+      </div>
+  );
+}
+
+// children attr - predefined Ract keyword which is taking data between component
+// opening and closing tag
+function Button({textColor, bgColor, onClickHandler, children}) {
+  return (
+          <button
+              style={{backgroundColor: bgColor, color: textColor}}
+              onClick={onClickHandler}  // must be just stated, not called directly
+          >
+            {children}
+          </button>
+  );
 }
