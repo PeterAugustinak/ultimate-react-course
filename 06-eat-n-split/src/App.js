@@ -44,7 +44,7 @@ export default function App() {
 
   // updates FriendsList after confirming of adding new friend + hide the
   // AddFriend component
-  function handAddFriend(friend) {
+  function handleAddFriend(friend) {
     setFriends(friends => [...friends, friend]);
     setShowAddFriend(false);
     }
@@ -57,8 +57,26 @@ export default function App() {
     // friend - it will close AddFriend so it is not opened at the same time
     // as FormSplitBill
     setShowAddFriend(false);
-    }
+  }
 
+  // after submitting the SplitBill, we need to update concerned Friend balance
+  // in the FriendLists
+  function handleSplitBill(value) {
+    // updating Friends list
+    setFriends(friends =>
+      // iterating through friends in list
+      friends.map(friend =>
+       friend.id == selectedFriend.id
+         // if the iterated friend is the selected one, we adjust balance based on the received value
+         ? {...friend, balance: friend.balance + value}
+         // if not, we just leave this friend as it is
+         : friend
+       )
+    );
+    // by this we will close SplitBill form and that means values in form are
+    // reset to default (empty)
+    setSelectedFriend(null);
+  }
 
   return (
       <div className="app">
@@ -69,12 +87,17 @@ export default function App() {
             onSelection={handleSelection}
             />
 
-          {showAddFriend && <FormAddFriend onAddFriend={handAddFriend}/>}
+          {showAddFriend && <FormAddFriend onAddFriend={handleAddFriend}/>}
           <Button onClick={handleShowAddFriend}>
             {showAddFriend ? "Close" : "Add friend"}
           </Button>
         </div>
-        {selectedFriend && <FormSplitBill selectedFriend={selectedFriend}/>}
+        {selectedFriend &&
+          <FormSplitBill
+            selectedFriend={selectedFriend}
+            onSplitBill={handleSplitBill}
+          />
+        }
       </div>
   );
 }
@@ -149,7 +172,7 @@ function FormAddFriend({onAddFriend}) {
             id: id,
             };
 
-        // here is the function in App called to re-render FriendsList with add newly
+        // here is the function in App called to re-render FriendsList with newly
         // added friend
         onAddFriend(newFriend);
 
@@ -180,7 +203,7 @@ function FormAddFriend({onAddFriend}) {
   )
 }
 
-function FormSplitBill({selectedFriend}) {
+function FormSplitBill({selectedFriend, onSplitBill}) {
   // default must be string as it is for form text input
   const [bill, setBill] = useState("");
   const [paidByUser, setPaidByUser] = useState("");
@@ -189,8 +212,17 @@ function FormSplitBill({selectedFriend}) {
   const paidByFriend = bill ? bill - paidByUser : "";
   const [whoIsPaying, setWhoIsPaying] = useState("user");
 
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    // we prevent to confirm form without required values filled
+    if(!bill || !paidByUser) return;
+    // calculates returned value based Who is paying the bill form selection
+    onSplitBill(whoIsPaying === 'user' ? paidByFriend : -paidByUser);
+  }
+
   return (
-      <form className="form-split-bill">
+      <form className="form-split-bill" onSubmit={handleSubmit}>
         <h2>Split a bill with {selectedFriend.name}</h2>
 
         <label>X Bill value</label>
