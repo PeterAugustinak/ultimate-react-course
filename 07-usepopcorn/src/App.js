@@ -50,28 +50,51 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-
 export default function App() {
+  const [movies, setMovies] = useState(tempMovieData);
+
   return (
   <>
-    <NavBar />
-    <Main />
+    // we need `movies` prop in various component down the tree, so instead of moving
+    // this prop one by one through the components along the way, we create tree in
+    // here a change the "intermediate" components to accept children - which are
+    // another components
+
+    // navbar component is now accepting children - we placed Search and SearchResult
+    // as a children where SearchResult now directly accept movies prop, instead of
+    // moving in down through intermediate NavBar component
+    <NavBar>
+        <Search />
+        <SearchResults movies={movies}/>
+    </NavBar>
+
+    // same with Main component - movies are needed inside the MoviesList, so we
+    // have created tree so movies prop does not need to travel through intermediate
+    // Main and ListBox components
+    <Main>
+        <ListBox>
+            <MovieList movies={movies}/>
+        </ListBox>
+        <WatchedBox/>
+    </Main>
+
   </>
     )
 }
 
+// structural component
+function NavBar({children}) {
 
-function NavBar() {
+  // children here are now <Search> and <SearchResults>
   return (
       <nav className="nav-bar">
         <Logo />
-        <Search />
-        <SearchResults />
+        {children}
       </nav>
   )
 }
 
-
+// presentational component (no state)
 function Logo() {
     return (
         <div className="logo">
@@ -81,7 +104,7 @@ function Logo() {
     )
 }
 
-
+// stateful component
 function Search() {
   const [query, setQuery] = useState("");
 
@@ -96,26 +119,29 @@ function Search() {
   )
 }
 
-function SearchResults() {
+// presentational
+function SearchResults({movies}) {
   return (
     <p className="num-results">
-      Found <strong>X</strong> results
+      Found <strong>{movies.length}</strong> results
     </p>
   )
 }
 
-
-function Main() {
+// structural
+function Main({children}) {
+  // children here are now <ListBox> and <WatchedBox>
   return (
       <main className="main">
-        <ListBox />
-        <WatchedBox />
+        {children}
       </main>
     )
 }
 
+// stateful
+function ListBox({children}) {
+  // children here now is the <MovieList>
 
-function ListBox() {
   const [isOpen1, setIsOpen1] = useState(true);
 
     return (
@@ -126,17 +152,13 @@ function ListBox() {
           >
             {isOpen1 ? "–" : "+"}
           </button>
-          {isOpen1 && (
-            <MovieList />
-          )}
+          {isOpen1 && children}
         </div>
     )
 }
 
-
-function MovieList() {
-  const [movies, setMovies] = useState(tempMovieData);
-
+//stateful
+function MovieList({movies}) {
     return (
             <ul className="list">
               {movies?.map((movie) => (
@@ -146,7 +168,7 @@ function MovieList() {
     )
 }
 
-
+// presentational
 function Movie({movie}) {
     return (
         <li>
@@ -162,7 +184,7 @@ function Movie({movie}) {
     )
 }
 
-
+// stateful
 function WatchedBox() {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isOpen2, setIsOpen2] = useState(true);
@@ -186,7 +208,7 @@ function WatchedBox() {
     )
 }
 
-
+// presentational
 function WatchedSummary({ watched}) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
@@ -217,7 +239,7 @@ function WatchedSummary({ watched}) {
     )
 }
 
-
+// presentational
 function WatchedMoviesList({ watched }) {
     return (
       <ul className="list">
@@ -228,7 +250,7 @@ function WatchedMoviesList({ watched }) {
     )
 }
 
-
+// presentational
 function WatchedMovie({ movie }) {
     return (
       <li>
