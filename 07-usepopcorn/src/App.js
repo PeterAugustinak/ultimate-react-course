@@ -51,34 +51,43 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
+    const [movies, setMovies] = useState(tempMovieData);
+    const [watched, setWatched] = useState(tempWatchedData);
 
-  return (
-  <>
     // we need `movies` prop in various component down the tree, so instead of moving
     // this prop one by one through the components along the way, we create tree in
     // here a change the "intermediate" components to accept children - which are
     // another components
-
     // navbar component is now accepting children - we placed Search and SearchResult
     // as a children where SearchResult now directly accept movies prop, instead of
     // moving in down through intermediate NavBar component
-    <NavBar>
-        <Search />
-        <SearchResults movies={movies}/>
-    </NavBar>
 
     // same with Main component - movies are needed inside the MoviesList, so we
     // have created tree so movies prop does not need to travel through intermediate
     // Main and ListBox components
-    <Main>
-        <ListBox>
-            <MovieList movies={movies}/>
-        </ListBox>
-        <WatchedBox/>
-    </Main>
 
-  </>
+      return (
+      <>
+
+        <NavBar>
+            <Search />
+            <SearchResults movies={movies}/>
+        </NavBar>
+
+        <Main>
+
+            <Box>
+                <MovieList movies={movies}/>
+            </Box>
+
+            <Box>
+              <WatchedSummary watched={watched} />
+              <WatchedMoviesList watched={watched} />
+            </Box>
+
+        </Main>
+
+      </>
     )
 }
 
@@ -139,23 +148,23 @@ function Main({children}) {
 }
 
 // stateful
-function ListBox({children}) {
-  // children here now is the <MovieList>
-
-  const [isOpen1, setIsOpen1] = useState(true);
+function Box({children}) {
+  // common box for ListBox and WatchedBox
+  const [isOpen, setIsOpen] = useState(true);
 
     return (
         <div className="box">
           <button
             className="btn-toggle"
-            onClick={() => setIsOpen1((open) => !open)}
+            onClick={() => setIsOpen((open) => !open)}
           >
-            {isOpen1 ? "–" : "+"}
+            {isOpen ? "–" : "+"}
           </button>
-          {isOpen1 && children}
+          {isOpen && children}
         </div>
     )
 }
+
 
 //stateful
 function MovieList({movies}) {
@@ -184,29 +193,6 @@ function Movie({movie}) {
     )
 }
 
-// stateful
-function WatchedBox() {
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [isOpen2, setIsOpen2] = useState(true);
-
-    return (
-        <div className="box">
-          <button
-            className="btn-toggle"
-            onClick={() => setIsOpen2((open) => !open)}
-          >
-            {isOpen2 ? "–" : "+"}
-          </button>
-          {isOpen2 && (
-            <>
-              <WatchedSummary watched={watched} />
-              <WatchedMoviesList watched={watched} />
-
-            </>
-          )}
-        </div>
-    )
-}
 
 // presentational
 function WatchedSummary({ watched}) {
