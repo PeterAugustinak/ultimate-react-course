@@ -12,55 +12,81 @@ const starContainerStyle = {
     display: 'flex',
 };
 
-const textStyle = {
-    lineHeight: "1",
-    margin: "0",
-};
 
-export default function StarRating({ maxRating = 5} ) {
+export default function StarRating({
+    maxRating = 5, color='#fcc419', size=48, className="", messages=[]
+} ) {
+    // for "fixed" stars
     const [rating, setRating] = useState(0);
+    // for "hovering" stars
+    const [tempRating, setTempRating] = useState(0);
 
     function handleRating (rating) {
         setRating(rating)
     }
 
+    // css props
+    const textStyle = {
+    lineHeight: "1",
+    margin: "0",
+    color,
+    fontSize: `${size / 1.5}px`,
+    };
+
     return (
-        <div style={containerStyle}>
+        <div style={containerStyle} className={className}>
             <div style={starContainerStyle}>
                 {Array.from({length: maxRating}, (_ , i) => (
                     <Star
                         key={i}
+                        /* when mouse is hovering, tempRating will be in charge, otherwise rating */
+                        full={tempRating ? tempRating >= i + 1 : rating >= i + 1}
                         onRate={() => handleRating(i + 1)}
-                        full={rating >= i + 1}
+                        onHoverIn={() => setTempRating(i + 1)}
+                        /* when mouse is out of starts, no tempRating exists*/
+                        onHoverOut={() => setTempRating(0)}
+                        color={color}
+                        size={size}
                     />
                 ))}
             </div>
-            {/* show rating value only if there is rating - means at least one star clicked*/}
-            {rating > 0 && <p style={textStyle}>{rating}</p>}
+            {/* show rating value - if there is tempRating, it has priority, then rating and if no star selected
+              show nothing
+              if there is list with messages of the same length as maxRating, messages have priority */ }
+            <p style={textStyle}>{
+                messages.length === maxRating ? messages[tempRating ? tempRating-1 : rating-1] : tempRating || rating || ""
+                }
+            </p>
         </div>
     )
 }
 
 
-const starStyle = {
-    width: '48px',
-    height: '48px',
+function Star({ onRate, full, onHoverIn, onHoverOut, color, size} ) {
+    // render either full or empty start based on bool `full`
+    // when star is clicked, `onRate` handler sets the number of stars clicked
+
+    // css props
+    const starStyle = {
+    width: `${size}px`,
+    height: `${size}px`,
     display: "block",
     cursor: "pointer",
 }
 
-
-function Star({ onRate, full} ) {
-    // render either full or empty start based on bool `full`
-    // when star is clicked, `onRate` handler sets the number of stars clicked
-
     return (
-        <span role="button" style={starStyle} onClick={onRate}>
+        <span
+            role="button"
+             style={starStyle}
+             onClick={onRate}
+             onMouseEnter={onHoverIn}
+             onMouseLeave={onHoverOut}
+             >
         {full ? (
              <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
-              fill="#000"
+              fill={color}
               stroke="#000"
             >
               <path
