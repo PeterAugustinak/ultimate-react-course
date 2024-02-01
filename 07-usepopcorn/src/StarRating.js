@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 
 // placing css styles outside of the function so they don't need top be regenerated each time the
 // component is called
@@ -13,16 +14,35 @@ const starContainerStyle = {
 };
 
 
+// it is possible to chain with .isRequired, but better way is to use default values in function
+StarRating.propTypes = {
+    maxRating: PropTypes.number,
+    defaultRating: PropTypes.number,
+    color: PropTypes.string,
+    size: PropTypes.number,
+    messages: PropTypes.array,
+    onRateChange: PropTypes.func,
+    className: PropTypes.string,
+};
+
+
 export default function StarRating({
-    maxRating = 5, color='#fcc419', size=48, className="", messages=[]
-} ) {
+    maxRating = 5,
+    defaultRating=0,
+    color='#fcc419',
+    size=48,
+    className="",
+    messages=[],
+    onRateChange,
+}) {
     // for "fixed" stars
-    const [rating, setRating] = useState(0);
+    const [rating, setRating] = useState(defaultRating);
     // for "hovering" stars
     const [tempRating, setTempRating] = useState(0);
 
     function handleRating (rating) {
         setRating(rating)
+        onRateChange(rating)
     }
 
     // css props
