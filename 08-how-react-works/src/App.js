@@ -26,6 +26,11 @@ export default function App() {
   );
 }
 
+//console.log(<DifferentContent test={22} />);
+// never do this - calling component as a function. It is recognized as a html element
+// instead of proper react component
+//console.log(DifferentContent());
+
 function Tabbed({ content }) {
   const [activeTab, setActiveTab] = useState(0);
 
