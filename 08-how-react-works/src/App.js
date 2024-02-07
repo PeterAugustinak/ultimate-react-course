@@ -70,8 +70,40 @@ function TabContent({ item }) {
   const [showDetails, setShowDetails] = useState(true);
   const [likes, setLikes] = useState(0);
 
+    console.log('render')
+
   function handleInc() {
     setLikes(likes + 1);
+  }
+
+  function handleTripleClick() {
+    // this will never work without callback function
+    // setLikes(likes + 1);
+    // setLikes(likes + 1);
+    // setLikes(likes + 1);
+
+    // properly done with callback function
+    // needs to be used always when we updating state based on the
+    // previous state
+    setLikes((likes) => likes + 1);
+    setLikes((likes) => likes + 1);
+    setLikes((likes) => likes + 1);
+
+    // nor this will work until handleInc is not using callback implementation
+    // handleInc();
+    // handleInc();
+    // handleInc();
+  }
+
+  function handleUndoLikes() {
+    setShowDetails(true);
+    setLikes(0);
+    // likes are still not affected by above, it will be re-rendered as batch
+    console.log(likes);
+  }
+
+  function handleUndoLater() {
+    setTimeout(handleUndoLikes, 2000);
   }
 
   return (
@@ -87,13 +119,13 @@ function TabContent({ item }) {
         <div className="hearts-counter">
           <span>{likes} ❤️</span>
           <button onClick={handleInc}>+</button>
-          <button>+++</button>
+          <button onClick={handleTripleClick}>+++</button>
         </div>
       </div>
 
       <div className="tab-undo">
-        <button>Undo</button>
-        <button>Undo in 2s</button>
+        <button onClick={handleUndoLikes}>Undo</button>
+        <button onClick={handleUndoLater}>Undo in 2s</button>
       </div>
     </div>
   );
