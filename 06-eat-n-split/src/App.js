@@ -66,7 +66,7 @@ export default function App() {
     setFriends(friends =>
       // iterating through friends in list
       friends.map(friend =>
-       friend.id == selectedFriend.id
+       friend.id === selectedFriend.id
          // if the iterated friend is the selected one, we adjust balance based on the received value
          ? {...friend, balance: friend.balance + value}
          // if not, we just leave this friend as it is
@@ -96,6 +96,7 @@ export default function App() {
           <FormSplitBill
             selectedFriend={selectedFriend}
             onSplitBill={handleSplitBill}
+            key={selectedFriend.id}
           />
         }
       </div>
