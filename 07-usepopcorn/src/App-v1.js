@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
   {
@@ -50,19 +50,9 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const API_KEY = "8c99f3d0";
-
 export default function App() {
-    const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState([]);
-
-    // we cannot use the fetch and setState inside the component as it is causing
-    // infinite re-rendering - that's why useEffect
-    useEffect(function () {
-        fetch(`http://www.omdbapi.com/?apikey=${API_KEY}&s=back`)
-            .then((res) => res.json())
-            .then((data) => setMovies(data.Search));
-        }, []);
+    const [movies, setMovies] = useState(tempMovieData);
+    const [watched, setWatched] = useState(tempWatchedData);
 
     // we need `movies` prop in various component down the tree, so instead of moving
     // this prop one by one through the components along the way, we create tree in
