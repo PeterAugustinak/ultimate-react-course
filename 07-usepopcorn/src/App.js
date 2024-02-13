@@ -55,13 +55,35 @@ const API_KEY = "8c99f3d0";
 export default function App() {
     const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const query = "wedwed"
 
     // we cannot use the fetch and setState inside the component as it is causing
     // infinite re-rendering - that's why useEffect
     useEffect(function () {
-        fetch(`http://www.omdbapi.com/?apikey=${API_KEY}&s=back`)
-            .then((res) => res.json())
-            .then((data) => setMovies(data.Search));
+        async function fetchMovies() {
+            try {
+                setIsLoading(true);
+                const res = await fetch(
+                    `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`
+                );
+                if(!res.ok)
+                    throw new Error("Something went wrong ...");
+
+                const data = await res.json();
+                if (data.Response === 'False')
+                    throw new Error("Movie not found!")
+
+
+                setMovies(data.Search);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchMovies();
         }, []);
 
     // we need `movies` prop in various component down the tree, so instead of moving
@@ -87,7 +109,9 @@ export default function App() {
         <Main>
 
             <Box>
-                <MovieList movies={movies}/>
+                {isLoading && <Loader />}
+                {!isLoading && !error && <MovieList movies={movies}/>}
+                {error && <ErrorMessage message={error} />}
             </Box>
 
             <Box>
@@ -100,6 +124,20 @@ export default function App() {
       </>
     )
 }
+
+function Loader() {
+    return <p className="loader">LOADING ...</p>
+}
+
+
+function ErrorMessage({error}) {
+    return (
+        <p className="error">
+            <span>{error}</span>
+        </p>
+    )
+}
+
 
 // structural component
 function NavBar({children}) {
