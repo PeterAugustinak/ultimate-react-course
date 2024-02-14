@@ -53,11 +53,30 @@ const average = (arr) =>
 const API_KEY = "8c99f3d0";
 
 export default function App() {
+    const [query, setQuery] = useState("inception");
     const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const query = "wedwed"
+    const [selectedId, setSelectedId] = useState(null);
+
+//    useEffect(function () {
+//        console.log("Only after initial render (no dependency")}, []
+//    )
+//
+//    useEffect(function ()
+//        {console.log("After every render (depends on everything)")}
+//    )
+//
+//    console.log("During render")
+
+    function handleSelectedMovie(id) {
+        setSelectedId((selectedId) => (id === selectedId ? null: id));
+    }
+
+    function handleCloseMovie() {
+        setSelectedId(null);
+    }
 
     // we cannot use the fetch and setState inside the component as it is causing
     // infinite re-rendering - that's why useEffect
@@ -65,17 +84,15 @@ export default function App() {
         async function fetchMovies() {
             try {
                 setIsLoading(true);
+                setError("");
                 const res = await fetch(
                     `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`
                 );
                 if(!res.ok)
                     throw new Error("Something went wrong ...");
-
                 const data = await res.json();
-                if (data.Response === 'False')
+                if (data.Response === "False")
                     throw new Error("Movie not found!")
-
-
                 setMovies(data.Search);
             } catch (err) {
                 setError(err.message);
@@ -83,8 +100,15 @@ export default function App() {
                 setIsLoading(false);
             }
         }
+
+        if(query.length < 3) {
+            setMovies([]);
+            setError("");
+            return;
+        }
         fetchMovies();
-        }, []);
+        }, [query]
+        );
 
     // we need `movies` prop in various component down the tree, so instead of moving
     // this prop one by one through the components along the way, we create tree in
@@ -102,7 +126,7 @@ export default function App() {
       <>
 
         <NavBar>
-            <Search />
+            <Search query={query} setQuery={setQuery}/>
             <SearchResults movies={movies}/>
         </NavBar>
 
@@ -110,13 +134,25 @@ export default function App() {
 
             <Box>
                 {isLoading && <Loader />}
-                {!isLoading && !error && <MovieList movies={movies}/>}
+                {!isLoading && !error && <MovieList
+                                            movies={movies}
+                                            onSelectedMovie={handleSelectedMovie}
+                                         />}
                 {error && <ErrorMessage message={error} />}
             </Box>
 
             <Box>
-              <WatchedSummary watched={watched} />
-              <WatchedMoviesList watched={watched} />
+              {selectedId ? (
+                <MovieDetails
+                    selectedId={selectedId}
+                    onCloseMovie={handleCloseMovie}
+                    /> )
+                : (
+                <>
+                    <WatchedSummary watched={watched} />
+                    <WatchedMoviesList watched={watched} />
+                </>
+                )}
             </Box>
 
         </Main>
@@ -131,6 +167,7 @@ function Loader() {
 
 
 function ErrorMessage({error}) {
+    console.log(error)
     return (
         <p className="error">
             <span>{error}</span>
@@ -162,8 +199,7 @@ function Logo() {
 }
 
 // stateful component
-function Search() {
-  const [query, setQuery] = useState("");
+function Search({query, setQuery}) {
 
   return (
     <input
@@ -215,20 +251,20 @@ function Box({children}) {
 
 
 //stateful
-function MovieList({movies}) {
+function MovieList({movies, onSelectedMovie}) {
     return (
-            <ul className="list">
+            <ul className="list list-movies">
               {movies?.map((movie) => (
-                <Movie movie={movie} key={movie.imdbID}/>
+                <Movie movie={movie} key={movie.imdbID} onSelectedMovie={onSelectedMovie}/>
               ))}
             </ul>
     )
 }
 
 // presentational
-function Movie({movie}) {
+function Movie({movie, onSelectedMovie}) {
     return (
-        <li>
+        <li onClick={() => onSelectedMovie(movie.imbID)}>
           <img src={movie.Poster} alt={`${movie.Title} poster`} />
           <h3>{movie.Title}</h3>
           <div>
@@ -241,6 +277,17 @@ function Movie({movie}) {
     )
 }
 
+
+function MovieDetails({selectedId, onCloseMovie}) {
+    return (
+        <div className="details">
+            <button className="btn-back" onClick={onCloseMovie}>
+                &larr;
+            </button>
+            {selectedId}
+       </div>
+       )
+    }
 
 // presentational
 function WatchedSummary({ watched}) {
