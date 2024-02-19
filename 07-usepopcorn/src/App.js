@@ -54,7 +54,7 @@ const average = (arr) =>
 const API_KEY = "8c99f3d0";
 
 export default function App() {
-    const [query, setQuery] = useState("inception");
+    const [query, setQuery] = useState("");
     const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -90,12 +90,15 @@ export default function App() {
     // we cannot use the fetch and setState inside the component as it is causing
     // infinite re-rendering - that's why useEffect
     useEffect(function () {
+        const controller = new AbortController();
+
         async function fetchMovies() {
             try {
                 setIsLoading(true);
                 setError("");
                 const res = await fetch(
-                    `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`
+                    `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`,
+                    {signal: controller.signal}
                 );
                 if(!res.ok)
                     throw new Error("Something went wrong ...");
@@ -103,8 +106,11 @@ export default function App() {
                 if (data.Response === "False")
                     throw new Error("Movie not found!")
                 setMovies(data.Search);
+                setError("");
             } catch (err) {
-                setError(err.message);
+                if (err.name !== "AbortError") {
+                    setError(err.message);
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -115,7 +121,16 @@ export default function App() {
             setError("");
             return;
         }
+
+        // to close the selected movie when new search starts
+        handleCloseMovie();
+
         fetchMovies();
+
+        return function() {
+            controller.abort();
+        };
+
         }, [query]
         );
 
@@ -131,7 +146,7 @@ export default function App() {
     // have created tree so movies prop does not need to travel through intermediate
     // Main and ListBox components
 
-      console.log(selectedId);
+      // console.log(selectedId);
       return (
       <>
 
@@ -311,6 +326,24 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
         Genre: genre,
      } = movie;
 
+    // this sets listener for the entire document
+    useEffect(function () {
+        function callback(e) {
+            if(e.code === "Escape") {
+                onCloseMovie();
+            }
+        }
+
+        document.addEventListener("keydown", callback);
+
+        // clean up function to remove even listener so it is not copied to another component
+        return function() {
+            document.removeEventListener("keydown", callback);
+        }
+
+    }, [onCloseMovie]
+    );
+
     function handleAdd() {
         const newWatchedMovie = {
             imdbID: selectedId,
@@ -337,11 +370,16 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
             setIsLoading(false);
         }
         getMovieDetails();
-}, [selectedId]);
+    }, [selectedId]);
 
     useEffect(function() {
         if (!title) return;
         document.title = `Movie | ${title}`;
+
+        // clean up function
+        return function() {
+            document.title = "usePopcorn";
+        }
     }, [title]);
 
     return (
