@@ -1,52 +1,6 @@
 import { useState, useEffect } from "react";
 import StarRating from "./StarRating"
 
-const tempMovieData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt0133093",
-    Title: "The Matrix",
-    Year: "1999",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt6751668",
-    Title: "Parasite",
-    Year: "2019",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-  },
-];
-
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -60,16 +14,6 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [selectedId, setSelectedId] = useState(null);
-
-//    useEffect(function () {
-//        console.log("Only after initial render (no dependency")}, []
-//    )
-//
-//    useEffect(function ()
-//        {console.log("After every render (depends on everything)")}
-//    )
-//
-//    console.log("During render")
 
     function handleSelectedMovie(id) {
         setSelectedId((selectedId) => (id === selectedId ? null: id));
@@ -326,6 +270,41 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
         Genre: genre,
      } = movie;
 
+    // bad order of hooks examples (breaking of linked-list)
+    // BAD: conditional call of hook
+    // if (imdbRating > 8) [isTop, setIsTop] = useState(true);
+
+    // BAD: early return
+    // if (imdbRating > 8) return <p>Greatest ever!</p>
+
+    // BAD unnecessary usage of useEffect
+//    const [isTop, setIsTop] = useState(imdbRating > 8);
+//    console.log(isTop);
+//    useEffect(function() {
+//        setIsTop(imdbRating > 8);
+//    },
+//    [imdbRating]
+//    );
+
+    const isTop = imdbRating > 8
+    console.log(isTop);
+
+    const [avgRating, setAvgRating] = useState(0);
+    function handleAdd() {
+        const newWatchedMovie = {
+            imdbID: selectedId,
+            title,
+            year,
+            poster,
+            imdbRating: Number(imdbRating),
+            runtime: Number(runtime.split(' ').at(0)),
+            userRating,
+        }
+
+        onAddWatched(newWatchedMovie);
+        // onCloseMovie();
+    }
+
     // this sets listener for the entire document
     useEffect(function () {
         function callback(e) {
@@ -343,21 +322,6 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
 
     }, [onCloseMovie]
     );
-
-    function handleAdd() {
-        const newWatchedMovie = {
-            imdbID: selectedId,
-            title,
-            year,
-            poster,
-            imdbRating: Number(imdbRating),
-            runtime: Number(runtime.split(' ').at(0)),
-            userRating,
-        }
-
-        onAddWatched(newWatchedMovie);
-        onCloseMovie();
-    }
 
     useEffect(function() {
         async function getMovieDetails() {
