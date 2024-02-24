@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import StarRating from "./StarRating"
 
 
@@ -10,10 +10,17 @@ const API_KEY = "8c99f3d0";
 export default function App() {
     const [query, setQuery] = useState("");
     const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [selectedId, setSelectedId] = useState(null);
+
+    // const [watched, setWatched] = useState([]);
+    const [watched, setWatched] = useState(function() {
+        const storedValue = localStorage.getItem('watched')
+        // covert back from stringify to map (we do that in setItem)
+        return JSON.parse(storedValue);
+        }
+    );
 
     function handleSelectedMovie(id) {
         setSelectedId((selectedId) => (id === selectedId ? null: id));
@@ -25,11 +32,21 @@ export default function App() {
 
     function handleAddWatched(movie) {
         setWatched((watched) => [...watched, movie]);
+
+        // storing watched movies into the local storage but better to do it in effect
+        // localStorage.setItem('watched', JSON.stringify([...watched, movie]));
     }
 
     function handleDeleteWatched(id) {
         setWatched((watched) => watched.filter((movie) => movie.imdbID !== id ))
     }
+
+    // adding watched movie to local storage
+    useEffect(function () {
+        localStorage.setItem('watched', JSON.stringify(watched));
+        },
+        [watched]
+    );
 
     // we cannot use the fetch and setState inside the component as it is causing
     // infinite re-rendering - that's why useEffect
@@ -171,6 +188,30 @@ function Logo() {
 
 // stateful component
 function Search({query, setQuery}) {
+    // not the best way to focus on an input field
+    //  useEffect(function() {
+    //      const el = document.querySelector('.search');
+    //      el.focus();
+    //  }, []);
+
+    // instead use ref
+    const inputEl = useRef(null);
+
+    useEffect(function() {
+        function callback(e) {
+            if(document.activeElement === inputEl.current)
+            return;
+
+            if (e.code === "Enter") {
+                inputEl.current.focus()
+                setQuery("");
+            }
+        }
+
+        document.addEventListener('keydown', callback);
+        return () => document.addEventListener("keydown", callback);
+        }, [setQuery]
+    );
 
   return (
     <input
@@ -179,6 +220,7 @@ function Search({query, setQuery}) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl}
     />
   )
 }
