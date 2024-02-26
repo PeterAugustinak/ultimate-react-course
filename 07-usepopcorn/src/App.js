@@ -1,26 +1,30 @@
 import { useState, useEffect, useRef } from "react";
-import StarRating from "./StarRating"
 
+import StarRating from "./StarRating";
+import { useMovies } from "./useMovies";
+import { useLocalStorageState } from "./useLocalStorageState";
+import { useKey } from "./useKey";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const API_KEY = "8c99f3d0";
 
+
 export default function App() {
     const [query, setQuery] = useState("");
-    const [movies, setMovies] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
     const [selectedId, setSelectedId] = useState(null);
+    const {movies, isLoading, error} = useMovies(query);
+
+    const [watched, setWatched] = useLocalStorageState([], "watched");
 
     // const [watched, setWatched] = useState([]);
-    const [watched, setWatched] = useState(function() {
-        const storedValue = localStorage.getItem('watched')
-        // covert back from stringify to map (we do that in setItem)
-        return JSON.parse(storedValue);
-        }
-    );
+//    const [watched, setWatched] = useState(function() {
+//        const storedValue = localStorage.getItem('watched')
+//        // covert back from stringify to map (we do that in setItem)
+//        return JSON.parse(storedValue);
+//        }
+//    );
 
     function handleSelectedMovie(id) {
         setSelectedId((selectedId) => (id === selectedId ? null: id));
@@ -40,60 +44,6 @@ export default function App() {
     function handleDeleteWatched(id) {
         setWatched((watched) => watched.filter((movie) => movie.imdbID !== id ))
     }
-
-    // adding watched movie to local storage
-    useEffect(function () {
-        localStorage.setItem('watched', JSON.stringify(watched));
-        },
-        [watched]
-    );
-
-    // we cannot use the fetch and setState inside the component as it is causing
-    // infinite re-rendering - that's why useEffect
-    useEffect(function () {
-        const controller = new AbortController();
-
-        async function fetchMovies() {
-            try {
-                setIsLoading(true);
-                setError("");
-                const res = await fetch(
-                    `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`,
-                    {signal: controller.signal}
-                );
-                if(!res.ok)
-                    throw new Error("Something went wrong ...");
-                const data = await res.json();
-                if (data.Response === "False")
-                    throw new Error("Movie not found!")
-                setMovies(data.Search);
-                setError("");
-            } catch (err) {
-                if (err.name !== "AbortError") {
-                    setError(err.message);
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        if(query.length < 3) {
-            setMovies([]);
-            setError("");
-            return;
-        }
-
-        // to close the selected movie when new search starts
-        handleCloseMovie();
-
-        fetchMovies();
-
-        return function() {
-            controller.abort();
-        };
-
-        }, [query]
-        );
 
     // we need `movies` prop in various component down the tree, so instead of moving
     // this prop one by one through the components along the way, we create tree in
@@ -197,21 +147,11 @@ function Search({query, setQuery}) {
     // instead use ref
     const inputEl = useRef(null);
 
-    useEffect(function() {
-        function callback(e) {
-            if(document.activeElement === inputEl.current)
-            return;
-
-            if (e.code === "Enter") {
-                inputEl.current.focus()
-                setQuery("");
-            }
-        }
-
-        document.addEventListener('keydown', callback);
-        return () => document.addEventListener("keydown", callback);
-        }, [setQuery]
-    );
+    useKey("Enter", function() {
+        if(document.activeElement === inputEl.current) return;
+        inputEl.current.focus();
+        setQuery("");
+    });
 
   return (
     <input
@@ -296,8 +236,14 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
     const [isLoading, setIsLoading] = useState(false);
     const [userRating, setUserRating] = useState("");
 
+    const countRef = useRef(0);
+
+    useEffect(function() {
+        if (userRating) countRef.current++;
+    }, [userRating]);
+
     const isWatched = watched.map(movie => movie.imdbID).includes(selectedId);
-    const watchedUserRating = watched.find(movie => movie.imdbID === selectedId)?.userRating
+    const watchedUserRating = watched.find(movie => movie.imdbID === selectedId)?.userRating;
 
     const {
         Title: title,
@@ -341,29 +287,13 @@ function MovieDetails({selectedId, onCloseMovie, onAddWatched, watched}) {
             imdbRating: Number(imdbRating),
             runtime: Number(runtime.split(' ').at(0)),
             userRating,
+            countRatingDecisions: countRef.current,
         }
 
         onAddWatched(newWatchedMovie);
-        // onCloseMovie();
     }
 
-    // this sets listener for the entire document
-    useEffect(function () {
-        function callback(e) {
-            if(e.code === "Escape") {
-                onCloseMovie();
-            }
-        }
-
-        document.addEventListener("keydown", callback);
-
-        // clean up function to remove even listener so it is not copied to another component
-        return function() {
-            document.removeEventListener("keydown", callback);
-        }
-
-    }, [onCloseMovie]
-    );
+    useKey("escape", onCloseMovie);
 
     useEffect(function() {
         async function getMovieDetails() {
