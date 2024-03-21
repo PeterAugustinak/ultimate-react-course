@@ -3,7 +3,7 @@ import Spinner from "./Spinner.jsx";
 import Message from "./Message.jsx";
 import CountryItem from "./CountryItem.jsx";
 
-function CountriesList({cities, isLoading}) {
+function CountryList({cities, isLoading}) {
     if (isLoading) return <Spinner/>
     if (!cities.length) return <Message message="Add your first city by clicking on the city on the map"/>
 
@@ -22,4 +22,4 @@ function CountriesList({cities, isLoading}) {
     );
 }
 
-export default CountriesList;
+export default CountryList;
