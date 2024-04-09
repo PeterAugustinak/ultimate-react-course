@@ -1,8 +1,6 @@
 import {createContext, useContext, useState} from 'react';
 import {faker} from "@faker-js/faker";
 
-// 1) Create new context (so we can pas value to context provider
-const PostContext = createContext();
 
 function createRandomPost() {
     return {
@@ -11,12 +9,15 @@ function createRandomPost() {
     };
 }
 
+// 1) Create new context (so we can pas value to context provider
+const PostContext = createContext();
+
+
 function PostProvider({children}) {
-    const [searchQuery, setSearchQuery] = useState("");
     const [posts, setPosts] = useState(() =>
         Array.from({length: 30}, () => createRandomPost())
     );
-    console.log(posts)
+    const [searchQuery, setSearchQuery] = useState("");
 
     // Derived state. These are the posts that will actually be displayed
     const searchedPosts =
@@ -52,10 +53,8 @@ function PostProvider({children}) {
 
 function usePosts() {
     const context = useContext(PostContext);
-    if (context === undefined) {
-        throw new Error("PostXContext was used outside of the PostProvider")
-    }
-
+    if (context === undefined)
+        throw new Error("PostContext was used outside of the PostProvider");
     return context;
 }
 
