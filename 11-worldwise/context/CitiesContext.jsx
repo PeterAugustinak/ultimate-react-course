@@ -63,7 +63,7 @@ function CitiesProvider({children}) {
             } catch {
                 dispatch({
                     type: "rejected",
-                    payload: "There was an error loading cities data ..."
+                    payload: "There was an error loading cities data ...",
                 })
             }
         }
@@ -83,7 +83,7 @@ function CitiesProvider({children}) {
         } catch {
             dispatch({
                 type: "rejected",
-                payload: "There was an error loading city data ..."
+                payload: "There was an error loading city data ...",
             })
         }
     }
@@ -92,7 +92,7 @@ function CitiesProvider({children}) {
         dispatch({type: "loading"})
 
         try {
-            const res = await fetch(`${BASE_URL}/cities/`, {
+            const res = await fetch(`${BASE_URL}/cities`, {
                 method: "POST",
                 body: JSON.stringify(newCity),
                 headers: {
@@ -100,7 +100,7 @@ function CitiesProvider({children}) {
                 }
             });
             const data = await res.json();
-            dispatch({type: "city/loaded", payload: data})
+            dispatch({type: "city/created", payload: data})
 
         } catch {
             dispatch({

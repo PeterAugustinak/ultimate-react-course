@@ -52,7 +52,6 @@ function Form() {
                 setEmoji(convertToEmoji(data.countryCode))
             } catch (err) {
                 setGeocodingError(err.message);
-
             } finally {
                 setIsLoadingGeocoding(false);
             }
