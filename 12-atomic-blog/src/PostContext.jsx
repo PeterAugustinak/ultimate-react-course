@@ -40,7 +40,7 @@ function PostProvider({children}) {
     return (
         // 2) Provide value to child component
         <PostContext.Provider value={{
-            post: searchedPosts,
+            posts: searchedPosts,
             onAddPost: handleAddPost,
             onClearPost: handleClearPosts,
             searchQuery,
