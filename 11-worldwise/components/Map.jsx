@@ -71,7 +71,14 @@ function Map() {
 
 function ChangeCenter({position}) {
     const map = useMap();
-    map.setView(position);
+
+    // Ensure that position is defined and has lat/lng properties
+    if (position && position.lat && position.lng) {
+        map.setView(position);
+    } else {
+        console.error("Invalid position object:", position);
+    }
+
     return null;
 }
 
