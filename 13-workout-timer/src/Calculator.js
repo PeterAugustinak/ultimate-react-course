@@ -9,19 +9,35 @@ function Calculator({workouts, allowSound}) {
 
     const [duration, setDuration] = useState(0);
 
+    // this was replaced for the usage in useEffect bellow
+    // const playSound = useCallback(function () {
+    //     if (!allowSound) return;
+    //     const sound = new Audio(clickSound);
+    //     sound.play();
+    // }, [allowSound]);
+
+    useEffect(function () {
+        document.title = `Your ${number}-exercise workout`;
+    }, [number, duration, sets]);
+
     useEffect(() => {
         setDuration((number * sets * speed) / 60 + (sets - 1) * durationBreak);
     }, [number, sets, speed, durationBreak]);
 
+    useEffect(() => {
+        const playSound = function () {
+            if (!allowSound) return;
+            const sound = new Audio(clickSound);
+            sound.play();
+        };
+
+        playSound()
+
+    }, [duration, allowSound]);
+
     // const duration = (number * sets * speed) / 60 + (sets - 1) * durationBreak;
     const mins = Math.floor(duration);
     const seconds = (duration - mins) * 60;
-
-    const playSound = function () {
-        if (!allowSound) return;
-        const sound = new Audio(clickSound);
-        sound.play();
-    };
 
     // button - and + handlers
     function handleInc() {
