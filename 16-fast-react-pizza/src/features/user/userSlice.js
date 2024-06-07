@@ -23,7 +23,6 @@
 // }
 
 import {createSlice} from "@reduxjs/toolkit";
-import {useSelector} from "react-redux";
 
 const initialState = {
     username: "",
@@ -41,6 +40,6 @@ const userSlice = createSlice({
 
 export const {updateName} = userSlice.actions;
 
-export const getUsername = useSelector((state) => state.user.username);
+export const getUsername = state => state.user.username;
 
 export default userSlice.reducer;
