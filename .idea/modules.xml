@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/17-the-wild-oasis/.idea/the-wild-oasis.iml" filepath="$PROJECT_DIR$/17-the-wild-oasis/.idea/the-wild-oasis.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/ultimate-react-course.iml" filepath="$PROJECT_DIR$/.idea/ultimate-react-course.iml" />
     </modules>
   </component>
