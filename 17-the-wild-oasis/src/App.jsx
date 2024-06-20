@@ -7,6 +7,7 @@ import Settings from "./pages/Settings.jsx";
 import Users from "./pages/Users.jsx";
 import Bookings from "./pages/Bookings.jsx";
 import GlobalStyles from "./styles/GlobalStyles.js";
+import AppLayout from "./ui/AppLayout.jsx";
 
 function App() {
     return (
@@ -14,14 +15,16 @@ function App() {
             <GlobalStyles/>
             <BrowserRouter>
                 <Routes>
-                    <Route index element={<Navigate replace to="dashboard"/>}/>
-                    <Route path="dashboard" element={<Dashboard/>}/>
-                    <Route path="dashboard" element={<Bookings/>}/>
-                    <Route path="dashboard" element={<Cabins/>}/>
-                    <Route path="dashboard" element={<Login/>}/>
-                    <Route path="dashboard" element={<PageNotFound/>}/>
-                    <Route path="dashboard" element={<Settings/>}/>
-                    <Route path="dashboard" element={<Users/>}/>
+                    <Route element={<AppLayout/>}>
+                        <Route index element={<Navigate replace to="dashboard"/>}/>
+                        <Route path="dashboard" element={<Dashboard/>}/>
+                        <Route path="bookings" element={<Bookings/>}/>
+                        <Route path="cabins" element={<Cabins/>}/>
+                        <Route path="*" element={<PageNotFound/>}/>
+                        <Route path="settings" element={<Settings/>}/>
+                        <Route path="users" element={<Users/>}/>
+                    </Route>
+                    <Route path="login" element={<Login/>}/>
                 </Routes>
             </BrowserRouter>
         </>
