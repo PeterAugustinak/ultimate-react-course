@@ -14,13 +14,22 @@ const Main = styled.main`
     padding: 4rem 4.9rem 6.4rem;
 `
 
+const Container = styled.div`
+    max-width: 120rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+`
+
 function AppLayout() {
     return (
         <StyledAppLayout>
             <Header/>
             <Sidebar/>
             <Main>
-                <Outlet/>
+                <Container>
+                    <Outlet/>
+                </Container>
             </Main>
         </StyledAppLayout>
     );
