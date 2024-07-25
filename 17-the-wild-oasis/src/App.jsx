@@ -12,15 +12,13 @@ import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import {Toaster} from "react-hot-toast";
 
-const queryClient = new QueryClient(
-    {
-        defaultOptions: {
-            queries: {
-                staleTime: 0,
-            }
-        }
-    }
-);
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 0,
+        },
+    },
+});
 
 function App() {
     return (
@@ -35,9 +33,9 @@ function App() {
                         <Route path="dashboard" element={<Dashboard/>}/>
                         <Route path="bookings" element={<Bookings/>}/>
                         <Route path="cabins" element={<Cabins/>}/>
-                        <Route path="*" element={<PageNotFound/>}/>
                         <Route path="settings" element={<Settings/>}/>
                         <Route path="users" element={<Users/>}/>
+                        <Route path="*" element={<PageNotFound/>}/>
                     </Route>
                     <Route path="login" element={<Login/>}/>
                 </Routes>
@@ -58,11 +56,10 @@ function App() {
                         fontSize: "16px",
                         maxWidth: "500px",
                         padding: "16px 24px",
-                        backgroundColor: "var(--color-grey-0",
-                        color: "var(--color-grey-700",
-                    }
+                        backgroundColor: "var(--color-grey-0)",
+                        color: "var(--color-grey-700)",
+                    },
                 }}
-
             />
         </QueryClientProvider>
     );

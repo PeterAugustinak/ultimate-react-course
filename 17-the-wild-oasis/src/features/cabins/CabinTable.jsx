@@ -6,7 +6,6 @@ import CabinRow from "./CabinRow.jsx";
 
 const Table = styled.div`
     border: 1px solid var(--color-grey-200);
-
     font-size: 1.4rem;
     background-color: var(--color-grey-0);
     border-radius: 7px;
@@ -18,7 +17,6 @@ const TableHeader = styled.header`
     grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
     column-gap: 2.4rem;
     align-items: center;
-
     background-color: var(--color-grey-50);
     border-bottom: 1px solid var(--color-grey-100);
     text-transform: uppercase;
@@ -29,31 +27,30 @@ const TableHeader = styled.header`
 `;
 
 function CabinTable() {
-    const {
-        isLoading,
-        data: cabins,
-        error
-    } = useQuery({
+    const {isLoading, data: cabins, error} = useQuery({
         queryKey: ["cabins"],
         queryFn: getCabins,
     });
 
-    if (isLoading) return <Spinner/>
+    if (isLoading) return <Spinner/>;
+    if (error) return <div>Error loading cabins</div>;
+    if (!cabins || cabins.length === 0) return <div>No cabins available</div>;
 
-    return <Table role="table">
-        <TableHeader role="row">
-            <div></div>
-            <div>Cabin</div>
-            <div>Capacity</div>
-            <div>Price</div>
-            <div>Discount</div>
-            <div></div>
-        </TableHeader>
-        {cabins.map((cabin) => (
-            <CabinRow key={cabin.id} cabin={cabin}/>
-        ))}
-    </Table>
-
+    return (
+        <Table role="table">
+            <TableHeader role="row">
+                <div></div>
+                <div>Cabin</div>
+                <div>Capacity</div>
+                <div>Price</div>
+                <div>Discount</div>
+                <div></div>
+            </TableHeader>
+            {cabins.map((cabin) => (
+                <CabinRow key={cabin.id} cabin={cabin}/>
+            ))}
+        </Table>
+    );
 }
 
 export default CabinTable;
